@@ -4,7 +4,7 @@ import java.awt.*;
 
 public class Simulation {
     private static Cell[][] board;
-    private static final int BOARD_SIZE = 50;
+    private static final int BOARD_SIZE = 75;
 
     public static void main(String[] args) {
         new Simulation();
@@ -15,7 +15,39 @@ public class Simulation {
      */
     public Simulation() {
         board = generateBoard(BOARD_SIZE);
-        drawBoard();
+
+        while (true) {
+            drawBoard();
+            board = updateBoard();
+            UI.sleep(50);
+        }
+    }
+
+    /**
+     * updates the board using Conway's Game of Life rules
+     */
+    private Cell[][] updateBoard() {
+        Cell[][] updatedBoard = new Cell[BOARD_SIZE][BOARD_SIZE];
+
+        for (int row = 0; row < board.length; row++) {
+            for (int col = 0; col < board[row].length; col++) {
+                Cell currentCell = board[row][col];
+                int numNeighbours = numNeighbours(row, col);
+
+                if (!currentCell.isAlive() && numNeighbours == 3)//dead cell comes to life
+                    updatedBoard[row][col] = new Cell(true);
+                else if (currentCell.isAlive() && numNeighbours < 2)//under population
+                    updatedBoard[row][col] = new Cell(false);
+                else if (currentCell.isAlive() && numNeighbours > 3)//over population
+                    updatedBoard[row][col] = new Cell(false);
+                else if (currentCell.isAlive())//cell stays alive with 2 or 3 neighbours
+                    updatedBoard[row][col] = new Cell(true);
+                else//dead cell stays dead
+                    updatedBoard[row][col] = new Cell(false);
+            }
+        }
+
+        return updatedBoard;
     }
 
     /**
@@ -37,7 +69,7 @@ public class Simulation {
 
                 UI.fillRect(OFFSET + row * CELL_SIZE, OFFSET + col * CELL_SIZE, CELL_SIZE, CELL_SIZE);
 
-                //draws number of neighbours 
+                //draws number of neighbours
                 UI.setColor(Color.YELLOW);
                 UI.drawString(Integer.toString(numNeighbours(row, col)), OFFSET + row * CELL_SIZE, OFFSET + col * CELL_SIZE + CELL_SIZE);
             }
